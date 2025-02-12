@@ -274,6 +274,11 @@ def main(argv: Sequence[str]) -> int:
 
     utilities.logging_config(log_level)
 
+    if tbm_options.args.task_of_interest != "":
+        print(f"Task of Interest: {tbm_options.args.task_of_interest}")
+    else:
+        raise RuntimeError("You must specify a task of interest")
+
     uarch = load_uarch()
 
     if tbm_options.args.trace is None:

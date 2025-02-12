@@ -46,6 +46,7 @@ class Utilization:
 @dataclass(slots=True)
 class Counter:
     cycles: int = 0
+    task_of_interest_cycles: list[int] = field(default_factory=list)
 
     retired_instruction_count: int = 0
 
@@ -89,6 +90,8 @@ class Counter:
         return self
 
     def print(self, file=sys.stdout) -> None:
+        print(f"*** number of jobs: {len(self.task_of_interest_cycles)}", file=file)
+        print(f"*** runtimes of ToI instances: {self.task_of_interest_cycles}", file=file)
         print(f"*** cycles: {self.cycles}", file=file)
         if self.cycles == 0:
             return

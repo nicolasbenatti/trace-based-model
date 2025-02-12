@@ -19,11 +19,20 @@ import counter
 from counter import Counter
 from instruction import Instruction
 import interfaces
+import tbm_options
 
 
 # TODO(b/261690182): rename the SchedUnit
 class SchedUnit(interfaces.SchedUnit):
     """Issue unit model."""
+
+    """User can specify a task of interest to keep track of its runtime
+    between various activations. This is the specific state reguarding the ToI.
+    0 -> outside of ToI
+    1 -> entered in ToI during the last clock cycle
+         (1st instruction of the task has been dispatched)
+    2 -> exited from ToI during the last clock cycle"""
+    task_of_interest_state: int = 0
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__("SC")
@@ -136,6 +145,23 @@ class SchedUnit(interfaces.SchedUnit):
                 if self._branch_prediction == "none":
                     self._branch_stalling = True
                     break
+
+            """ if self.task_of_interest_state == 2:
+                self.task_of_interest_state = 0 """
+
+            points = tbm_options.args.task_of_interest.split(":")
+            if len(points) == 2:
+                toi_start, toi_end1 = [int(el, 16) for el in points]
+                toi_end2 = None
+            else:
+                toi_start, toi_end1, toi_end2 = [int(el, 16) for el in points]
+            
+            if fetched_instr.addr == toi_start:
+                #print(f"ENTER process_sample: {fetched_instr.addr:0X}") 
+                self.task_of_interest_state = 1
+            elif fetched_instr.addr in [toi_end1, toi_end2]:
+                #print(f"EXIT process_sample: {fetched_instr.addr:0X}")
+                self.task_of_interest_state = 0
 
     # Implements interfaces.SchedUnit
     def tock(self, cntr: Counter) -> None:

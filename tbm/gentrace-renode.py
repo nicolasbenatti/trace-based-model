@@ -42,7 +42,7 @@ from ctypes import cdll, c_char_p, POINTER, c_void_p, c_ubyte, c_uint64, c_byte,
 
 
 FILE_SIGNATURE = b"ReTrace"
-FILE_VERSION = b"\x02"
+FILE_VERSION = b"\x04"
 HEADER_LENGTH = 10
 MEMORY_ACCESS_LENGTH = 9
 RISCV_VECTOR_CONFIGURATION_LENGTH = 16

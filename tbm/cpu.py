@@ -83,6 +83,7 @@ class CPU:
         prev_ret_insts = 0
         maybe_deadlock_count = 0
         deadlock_threshold = 100
+        prev_toi_state = 0
 
         for unit in self.units:
             unit.reset(self.counter)
@@ -107,6 +108,14 @@ class CPU:
                 self.log("start tock")
                 for unit in self.units:
                     unit.tock(self.counter)
+
+                if prev_toi_state == 0 and self.sched_unit.task_of_interest_state == 1:
+                    print("[CPU] ENTERED task of interest")
+                    task_of_interest_start = self.counter.cycles
+                elif prev_toi_state == 1 and self.sched_unit.task_of_interest_state == 0:
+                    self.counter.task_of_interest_cycles.append(self.counter.cycles - task_of_interest_start)
+                    print(f"[CPU] EXITED task of interest. Runtime {self.counter.cycles - task_of_interest_start} cycles")
+                prev_toi_state = self.sched_unit.task_of_interest_state
 
                 if tbm_options.args.print_trace:
                     self.print_state(tbm_options.args.print_trace)

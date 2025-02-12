@@ -82,6 +82,14 @@ def parse_args(argv: Sequence[str], description: str) -> None:
                         metavar="N",
                         dest="print_cycles")
 
+    parser.add_argument("-toi",
+                        "--task-of-interest",
+                        type=str,
+                        default="0:0",
+                        help="Compute execution times of each instance of the specified task",
+                        dest="task_of_interest",
+                        metavar="<entry>:<exit1>[:<exit2>]")
+
     parser.add_argument("--instructions",
                         default="0:",
                         help="Restrict the run to the instructions between N"
