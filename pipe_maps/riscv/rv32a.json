@@ -1,6 +1,7 @@
 {
   "__comment__": "AUTO-GENERATED FILE, DO NOT ADD NEW KEYS (it's ok to change values)!",
   "amoadd.w": "lsu",
+  "amoadd.w.aq": "lsu",
   "amoxor.w": "lsu",
   "amoor.w": "lsu",
   "amoand.w": "lsu",
@@ -10,5 +11,7 @@
   "amomaxu.w": "lsu",
   "amoswap.w": "lsu",
   "lr.w": "lsu",
-  "sc.w": "lsu"
+  "lr.w.aq": "lsu",
+  "sc.w": "lsu",
+  "sc.w.aq": "lsu"
 }

@@ -373,21 +373,6 @@
     "pipe_maps/riscv/system.json"
   ],
 
-  "__comment__ additional pipe_maps" : [
-    "pipe_maps/riscv/pseudo.json",
-    "pipe_maps/riscv/rv32c.json",
-    "pipe_maps/riscv/rv32d-zfh.json",
-    "pipe_maps/riscv/rv32k.json",
-    "pipe_maps/riscv/rv32q-zfh.json",
-    "pipe_maps/riscv/rv64b.json",
-    "pipe_maps/riscv/rv64c.json",
-    "pipe_maps/riscv/rv64k.json",
-    "pipe_maps/riscv/rv64zfh.json",
-    "pipe_maps/riscv/rvc.json",
-    "pipe_maps/riscv/rvk.json",
-    "pipe_maps/riscv/svinval.json"
-  ],
-
   # memory_system: object, required. Description of the memory hierarchy.
   "memory_system" : {
     # latencies: object, required.
@@ -414,91 +399,28 @@
       # the request by lower levels.
     },
 
-    # levels: map. Description of the lower cache levels.
     "levels" : {
-      "L3" : {
-        # type: enum, required. Possible values:
-        #   'dcache' - data cache, used for serving load/store instructions.
-        #   'icache' - instruction cache, used for fetching instructions.
-        #   'unified' - used for both instructions and data.
-        "type" : "unified",
-
-        # placement: object, required. Description of the placement policy.
-        "placement" : {
-          # type: enum, required. Possible values:
-          #   'direct_map'
-          #   'set_assoc'
-          "type" : "set_assoc",
-
-          # set_size: positive integer, required when 'type' is 'set_assoc'.
-          "set_size" : 4,
-
-          # replacement: enum, required when 'type' is 'set_assoc'. Possible values:
-          #   'LRU'
-          "replacement" : "LRU"
-        },
-
-        # write_policy: enum, required. Possible values:
-        #   'write_back'
-        #   'write_through'
+      "L1D" : {
+        "type" : "dcache",
+        "placement" : { "type" : "direct_map",
+                        "set_size" : 4,
+                        "replacement" : "LRU"
+                      },
         "write_policy" : "write_back",
-
-        # inclusion: enum, required with levels. Possible values:
-        #   'exclusive'
-        #   'inclusive'
-        "inclusion" : "exclusive",
-
-        # line_size: positive integer, required. Cache line size in bits.
+        "line_size" : 32,
+        "size" : "512B",
+        "latencies" : { "read" : 10, "write" : 10 }
+      },
+      "L1I" : {
+        "type" : "icache",
+        "placement" : { "type" : "set_assoc",
+                        "set_size" : 4,
+                        "replacement" : "LRU"
+                      },
+        "write_policy" : "write_back",
         "line_size" : 128,
-
-        # size: bytes, required. Can be a positive integer, or a string with
-        # one of the suffixes b, kb, mb, gb, tb, lowercase or uppercase (e.g.
-        # "4MB").
-        "size" : "4MB",
-
-        "latencies" : {
-          "fetch_read" : 1,
-          "fetch_write" : 1,
-          "write" : 1
-        },
-        "levels" : {
-          "L2" : {
-            "type" : "unified",
-            "placement" : { "type" : "set_assoc",
-                            "set_size" : 4,
-                            "replacement" : "LRU"
-                          },
-            "write_policy" : "write_back",
-            "inclusion" : "exclusive",
-            "line_size" : 128,
-            "size" : "256KB",
-            "latencies" : { "fetch_read" : 1, "fetch_write" : 1, "write" : 1 },
-            "levels" : {
-              "L1D" : {
-                "type" : "dcache",
-                "placement" : { "type" : "set_assoc",
-                                "set_size" : 4,
-                                "replacement" : "LRU"
-                              },
-                "write_policy" : "write_back",
-                "line_size" : 128,
-                "size" : "32KB",
-                "latencies" : { "read" : 1, "write" : 1 }
-              },
-              "L1I" : {
-                "type" : "icache",
-                "placement" : { "type" : "set_assoc",
-                                "set_size" : 4,
-                                "replacement" : "LRU"
-                              },
-                "write_policy" : "write_back",
-                "line_size" : 128,
-                "size" : "32KB",
-                "latencies" : { "read" : 1, "write" : 1 }
-              }
-            }
-          }
-        }
+        "size" : "32KB",
+        "latencies" : { "read" : 1, "write" : 1 }
       }
     }
   }
