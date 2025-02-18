@@ -97,25 +97,6 @@
       "write_ports" : 1
     },
 
-    "V" : {
-      "type" : "vector",
-      "regs" : [
-        "v0",  "v1",  "v2",  "v3",  "v4",  "v5",  "v6",  "v7",
-        "v8",  "v9",  "v10", "v11", "v12", "v13", "v14", "v15",
-        "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23",
-        "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31"
-      ],
-      "read_ports" : 2,
-      "write_ports" : 1,
-
-      # dedicated_read_ports: array. This property is only valid when the
-      # register file 'type' is 'vector'. See 'read_ports' for more
-      # information.
-      "dedicated_read_ports" : [ "v0" ]
-
-      # dedicated_write_ports, array. Similar to 'dedicated_read_ports'.
-    },
-
     "MISC" : {
       "type" : "scalar"
     }
@@ -129,10 +110,6 @@
       # queue can hold. If omitted, the queue is unrestricted (infinite).
       "size" : 4
     },
-
-    "V" : {
-      "size" : 4
-    }
   },
 
   # functional_units: map, required.
@@ -167,7 +144,7 @@
       # pipelined: boolean, required. When true, each pipeline stage can be
       # populated with a different instruction. Otherwise, only one instruction
       # can be in any stage of the pipeline.
-      "pipelined": true,
+      "pipelined": false,
 
       # load_stage: non-negative integer. For units that read from memory, this
       # is the pipeline stage (zero based) in which the memory accesses is
@@ -247,102 +224,6 @@
       "depth" : 1, "pipelined": false,
       "writeback_buff_size": 2
     },
-
-    "vctrl" : {
-      "description" : "TODO(sflur): not sure how to handle these instructions, so added this unit for now.",
-      "type" : "scalar",
-      "issue_queue" : "S",
-      "eiq_size" : 1, "can_skip_eiq" : true,
-      "depth" : 1, "pipelined": false,
-      "writeback_buff_size": 1
-    },
-
-    "vlsu" : {
-      "type" : "vector",
-      "issue_queue" : "V",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 3, "pipelined": true,
-      "load_stage": 1, "fixed_load_latency": 1,
-      "store_stage": 1, "fixed_store_latency": 1,
-      "memory_interface" : "L1D",
-      "writeback_buff_size": 2
-    },
-
-    "valu" : {
-      "type" : "vector",
-      "issue_queue" : "V",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 2, "pipelined": true,
-      "writeback_buff_size": 2
-    },
-
-    "vmac" : {
-      "type" : "vector",
-      "issue_queue" : "V",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 3, "pipelined": true,
-      "writeback_buff_size": 2
-    },
-
-    "vdiv" : {
-      "type" : "vector",
-      "issue_queue" : "V",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 3, "pipelined": true,
-      "writeback_buff_size": 2
-    },
-
-    "vperm" : {
-      "type" : "vector",
-      "issue_queue" : "V",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 3, "pipelined": true,
-      "writeback_buff_size": 2
-    },
-
-    "vred" : {
-      "type" : "vector",
-      "issue_queue" : "V",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 2, "pipelined": true,
-      "writeback_buff_size": 2
-    },
-
-    "vmsk" : {
-      "description" : "From the spec doc, this look more special, it is used in conjunction with other units.",
-      "type" : "vector",
-      "issue_queue" : "V",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 2, "pipelined": true,
-      "writeback_buff_size": 2
-    },
-
-    "vmv" : {
-      "description" : "This unit is not in the spec doc, but I suspect it might be added later.",
-      "type" : "vector",
-      "issue_queue" : "V",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 1, "pipelined": true,
-      "writeback_buff_size": 2
-    },
-
-    "vfspecial" : {
-      "description" : "Not in the spec doc! copied from old config",
-      "type" : "vector",
-      "issue_queue" : "V",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 2, "pipelined": true,
-      "writeback_buff_size": 2
-    },
-
-    "vnimp" : {
-      "description" : "For instructions we don't care to implement",
-      "type" : "vector",
-      "issue_queue" : "V",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 1, "pipelined": false,
-      "writeback_buff_size": 2
-    }
   },
 
   # pipe_maps: array, required. A list of files specifying the mapping from
@@ -381,17 +262,17 @@
       # number of cycles required for handling a fetch read request coming from
       # higher levels, not including the handling of the request by lower
       # levels.
-      "fetch_read" : 1,
+      "fetch_read" : 3,
 
       # fetch_write: positive integer, required with levels.
       # Similar to fetch_read.
-      "fetch_write" : 1,
+      "fetch_write" : 3,
 
       # write: positive integer, required (TODO(sflur): maybe this shouldn't be
       # required for instruction cache?). The number of cycles required for
       # handling a write request coming from a functional unit, not including
       # the handling of the request by lower levels.
-      "write" : 1
+      "write" : 3
 
       # read: positive integer, required when this level is used as a
       # memory_interface. The number of cycles required for handling a read
@@ -407,8 +288,8 @@
                         "replacement" : "LRU"
                       },
         "write_policy" : "write_back",
-        "line_size" : 32,
-        "size" : "512B",
+        "line_size" : 512, # NOTE: these are Bits
+        "size" : "32KB",
         "latencies" : { "read" : 10, "write" : 10 }
       },
       "L1I" : {
