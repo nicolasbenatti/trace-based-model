@@ -93,7 +93,7 @@ class Counter:
         print(f"*** number of jobs: {len(self.task_of_interest_cycles)}", file=file)
         print(f"*** runtimes of ToI instances: {self.task_of_interest_cycles}", file=file)
         print(f"*** Mean of distribution: {np.mean(self.task_of_interest_cycles)}", file=file)
-        print(f"*** Variance of distribution: {np.var(self.task_of_interest_cycles)}", file=file)
+        print(f"*** Stddev of distribution: {np.std(self.task_of_interest_cycles)}", file=file)
         print(f"*** cycles: {self.cycles}", file=file)
         if self.cycles == 0:
             return
