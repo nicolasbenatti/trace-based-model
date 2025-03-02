@@ -170,7 +170,7 @@ class CPU:
 
     def print_state_detailed(self, file=sys.stdout) -> None:
         """Dump a detailed snapshot."""
-        print(file=file)
+        print(f"[CPU] cycle {self.counter.cycles}", file=file)
         for unit in self.units:
             unit.print_state_detailed(file)
 
