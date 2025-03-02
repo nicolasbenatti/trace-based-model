@@ -19,7 +19,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import sys
 from typing import Optional
-
+import numpy as np
 
 @dataclass(slots=True)
 class Utilization:
@@ -92,6 +92,8 @@ class Counter:
     def print(self, file=sys.stdout) -> None:
         print(f"*** number of jobs: {len(self.task_of_interest_cycles)}", file=file)
         print(f"*** runtimes of ToI instances: {self.task_of_interest_cycles}", file=file)
+        print(f"*** Mean of distribution: {np.mean(self.task_of_interest_cycles)}", file=file)
+        print(f"*** Variance of distribution: {np.var(self.task_of_interest_cycles)}", file=file)
         print(f"*** cycles: {self.cycles}", file=file)
         if self.cycles == 0:
             return
