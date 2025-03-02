@@ -80,6 +80,7 @@ class DirectMapMem:
         self.index_size_log2 = size_log2 - self.line_size_log2
         self.tags = [None] * (2**self.index_size_log2)
         self.dirty = set()
+        print(f"block size: {(2**line_size_log2)}B, cache size: {(2**size_log2)}B")
 
     def index(self, addr: int) -> int:
         mask = (1 << self.index_size_log2) - 1
@@ -547,8 +548,17 @@ class MemorySystem(interfaces.Module):
 
     # Implements interfaces.Module
     def print_state_detailed(self, file) -> None:
-        # TODO(sflur): what would be useful to print here?
-        pass
+        print(f"[{self.name}]", file=file)
+        val = self.elements["L1D"]
+        mem_str = f"[L1D]\nstate: {val.state}"
+        tag_str = dirty_str = ""
+        if hasattr(val, "mem"):
+            tag_str = ' '.join([f"({i} -> {val.mem.tags[i]:#08x})" if val.mem.tags[i] is not None else "NONE" for i in range(len(val.mem.tags))]) 
+            if hasattr(val.mem, "dirty"):
+                if val.mem.dirty is not None:
+                    dirty_str = ' '.join([f"({el} -> {val.mem.tags[el] if val.mem.tags[el] else 0xdeadbeef:#08x})" for el in val.mem.dirty])
+
+        print(f"{mem_str}\ntags: {tag_str}\ndirty lines: {dirty_str}", file=file)
 
     # Implements interfaces.Module
     def get_state_three_valued_header(self) -> Sequence[str]:
