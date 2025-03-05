@@ -35,7 +35,7 @@
     #            computed.
     #   'perfect' - branching doesn't cause fetch stalls (the branch target is
     #               taken from the input trace).
-    "branch_prediction" : "none",
+    "branch_prediction" : "perfect",
 
     # fetch_rate: positive integer, required. The number of instructions that
     # are fetched in a cycle. If the fetch queue doesn't have enough space for
