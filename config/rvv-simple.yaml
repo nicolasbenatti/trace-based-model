@@ -35,21 +35,21 @@
     #            computed.
     #   'perfect' - branching doesn't cause fetch stalls (the branch target is
     #               taken from the input trace).
-    "branch_prediction" : "perfect",
+    "branch_prediction" : "none",
 
     # fetch_rate: positive integer, required. The number of instructions that
     # are fetched in a cycle. If the fetch queue doesn't have enough space for
     # all the instructions, none are fetched.
-    "fetch_rate" : 4,
+    "fetch_rate" : 1,
 
     # fetch_queue_size: positive integer. The size of the fetch queue. If
     # omitted, the queue is unrestricted (infinite).
-    "fetch_queue_size" : 4,
+    "fetch_queue_size" : 3,
 
     # decode_rate: positive integer. The number of instructions that can be
     # decoded and moved from the fetch queue to the dispatch queues in a cycle.
     # If omitted, as many instructions as possible are decoded and moved.
-    "decode_rate" : 4,
+    "decode_rate" : 1,
 
     # vector_slices: positive integer, required. The number of slices each
     # vector register is composed of.
@@ -129,13 +129,13 @@
 
       # eiq_size: positive integer. If omitted, the queue is unrestricted
       # (infinite).
-      "eiq_size" : 4,
+      "eiq_size" : 2,
 
       # can_skip_eiq: boolean, required. When true, instructions can move from
       # the issue queue directly to the first pipeline stage. Otherwise,
       # instructions must spend at list one cycle in the EIQ before they move
       # to the first pipeline stage.
-      "can_skip_eiq" : true,
+      "can_skip_eiq" : false,
 
       # depth: positive integer, required. The number of stages in the
       # pipeline.
@@ -155,14 +155,14 @@
       # specified. A load instruction will stall the pipeline only if it
       # reaches the pipeline stage 'load_stage + fixed_load_latency', and the
       # memory value is not available yet.
-      "fixed_load_latency": 1,
+      "fixed_load_latency": 0,
 
       # store_stage: non-negative integer. Similar to 'load_stage'.
       "store_stage": 1,
 
       # fixed_store_latency: non-negative integer, required when 'store_stage'
       # is specified. Similar to 'fixed_load_latency'.
-      "fixed_store_latency": 1,
+      "fixed_store_latency": 0,
 
       # memory_interface: string, required when 'load_stage' or 'store_stage'
       # are specified. This should be one of the cache levels (see
@@ -178,32 +178,32 @@
     "alu" : {
       "type" : "scalar",
       "issue_queue" : "S",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 1, "pipelined": true,
+      "eiq_size" : 2, "can_skip_eiq" : false,
+      "depth" : 1, "pipelined": false,
       "writeback_buff_size": 2
     },
 
     "div" : {
       "type" : "scalar",
       "issue_queue" : "S",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 4, "pipelined": true,
+      "eiq_size" : 2, "can_skip_eiq" : false,
+      "depth" : 4, "pipelined": false,
       "writeback_buff_size": 2
     },
 
     "mul" : {
       "type" : "scalar",
       "issue_queue" : "S",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 1, "pipelined": true,
+      "eiq_size" : 2, "can_skip_eiq" : false,
+      "depth" : 1, "pipelined": false,
       "writeback_buff_size": 2
     },
 
     "fpu" : {
       "type" : "scalar",
       "issue_queue" : "S",
-      "eiq_size" : 4, "can_skip_eiq" : true,
-      "depth" : 1, "pipelined": true,
+      "eiq_size" : 2, "can_skip_eiq" : false,
+      "depth" : 1, "pipelined": false,
       "writeback_buff_size": 2
     },
 
@@ -211,7 +211,7 @@
       "description" : "TODO(sflur): not sure how to handle these instruction, so added this unit for now.",
       "type" : "scalar",
       "issue_queue" : "S",
-      "eiq_size" : 1, "can_skip_eiq" : true,
+      "eiq_size" : 1, "can_skip_eiq" : false,
       "depth" : 1, "pipelined": false,
       "writeback_buff_size": 1
     },
@@ -220,7 +220,7 @@
       "description" : "TODO(sflur): not sure how to handle these instructions, so added this unit for now.",
       "type" : "scalar",
       "issue_queue" : "S",
-      "eiq_size" : 1, "can_skip_eiq" : true,
+      "eiq_size" : 1, "can_skip_eiq" : false,
       "depth" : 1, "pipelined": false,
       "writeback_buff_size": 2
     },
@@ -290,7 +290,7 @@
         "write_policy" : "write_back",
         "line_size" : 512, # NOTE: these are Bits
         "size" : "32KB",
-        "latencies" : { "read" : 3, "write" : 3 }
+        "latencies" : { "read" : 1, "write" : 1 }
       },
       "L1I" : {
         "type" : "icache",
