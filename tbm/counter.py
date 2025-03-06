@@ -47,6 +47,10 @@ class Utilization:
 class Counter:
     cycles: int = 0
     task_of_interest_cycles: list[int] = field(default_factory=list)
+    toi_start: int = 0
+    toi_end1: int = 0
+    toi_end2: int = 0
+    is_in_toi: bool = False
 
     retired_instruction_count: int = 0
 

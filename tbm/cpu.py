@@ -46,6 +46,12 @@ class CPU:
 
         # conunters
         self.counter = Counter()
+        points = tbm_options.args.task_of_interest.split(":")
+        if len(points) == 2:
+            self.counter.toi_start, self.counter.toi_end1 = [int(el, 16) for el in points]
+            self.counter.toi_end2 = None
+        else:
+            self.counter.toi_start, self.counter.toi_end1, self.counter.toi_end2 = [int(el, 16) for el in points]
 
         # Units
         self.fetch_unit = FetchUnit(config, trace)
@@ -109,13 +115,13 @@ class CPU:
                 for unit in self.units:
                     unit.tock(self.counter)
 
-                if prev_toi_state == 0 and self.sched_unit.task_of_interest_state == 1:
+                if prev_toi_state == False and self.counter.is_in_toi == True:
                     print("[CPU] ENTERED task of interest")
                     task_of_interest_start = self.counter.cycles
-                elif prev_toi_state == 1 and self.sched_unit.task_of_interest_state == 0:
+                elif prev_toi_state == True and self.counter.is_in_toi == False:
                     self.counter.task_of_interest_cycles.append(self.counter.cycles - task_of_interest_start)
                     print(f"[CPU] EXITED task of interest. Runtime {self.counter.cycles - task_of_interest_start} cycles")
-                prev_toi_state = self.sched_unit.task_of_interest_state
+                prev_toi_state = self.counter.is_in_toi
 
                 if tbm_options.args.print_trace:
                     self.print_state(tbm_options.args.print_trace)

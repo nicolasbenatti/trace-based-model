@@ -145,24 +145,7 @@ class SchedUnit(interfaces.SchedUnit):
                 if self._branch_prediction == "none":
                     self._branch_stalling = True
                     break
-
-            """ if self.task_of_interest_state == 2:
-                self.task_of_interest_state = 0 """
-
-            points = tbm_options.args.task_of_interest.split(":")
-            if len(points) == 2:
-                toi_start, toi_end1 = [int(el, 16) for el in points]
-                toi_end2 = None
-            else:
-                toi_start, toi_end1, toi_end2 = [int(el, 16) for el in points]
-            
-            if fetched_instr.addr == toi_start:
-                #print(f"ENTER process_sample: {fetched_instr.addr:0X}") 
-                self.task_of_interest_state = 1
-            elif fetched_instr.addr in [toi_end1, toi_end2]:
-                #print(f"EXIT process_sample: {fetched_instr.addr:0X}")
-                self.task_of_interest_state = 0
-
+ 
     # Implements interfaces.SchedUnit
     def tock(self, cntr: Counter) -> None:
         super().tock(cntr)
