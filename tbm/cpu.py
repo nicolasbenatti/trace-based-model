@@ -88,7 +88,7 @@ class CPU:
         # deadlock, and terminate the execution.
         prev_ret_insts = 0
         maybe_deadlock_count = 0
-        deadlock_threshold = 100
+        deadlock_threshold = 1000
         prev_toi_state = 0
 
         for unit in self.units:
