@@ -288,8 +288,8 @@
                         "replacement" : "LRU"
                       },
         "write_policy" : "write_back",
-        "line_size" : 512, # NOTE: these are Bits
-        "size" : "32KB",
+        "line_size" : 256, # bits
+        "size" : "16KB",
         "latencies" : { "read" : 1, "write" : 1 }
       },
       "L1I" : {
