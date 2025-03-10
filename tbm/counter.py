@@ -94,10 +94,15 @@ class Counter:
         return self
 
     def print(self, file=sys.stdout) -> None:
+        if len(self.task_of_interest_cycles) <= 0:
+            raise RuntimeError("ERROR: No execution times observed")
+
         print(f"*** number of jobs: {len(self.task_of_interest_cycles)}", file=file)
         print(f"*** runtimes of ToI instances: {self.task_of_interest_cycles}", file=file)
-        print(f"*** Mean of distribution: {np.mean(self.task_of_interest_cycles)}", file=file)
-        print(f"*** Stddev of distribution: {np.std(self.task_of_interest_cycles)}", file=file)
+        print(f"*** max. observation: {max(self.task_of_interest_cycles)}", file=file)
+        print(f"*** min. observation: {min(self.task_of_interest_cycles)}", file=file)
+        print(f"*** mean of distribution: {np.mean(self.task_of_interest_cycles)}", file=file)
+        print(f"*** stdev of distribution: {np.std(self.task_of_interest_cycles)}", file=file)
         print(f"*** cycles: {self.cycles}", file=file)
         if self.cycles == 0:
             return
