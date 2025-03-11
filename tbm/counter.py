@@ -46,7 +46,10 @@ class Utilization:
 @dataclass(slots=True)
 class Counter:
     cycles: int = 0
-    task_of_interest_cycles: list[int] = field(default_factory=list)
+
+    toi_runtime_observations: list[int] = field(default_factory=list)
+    toi_cachemiss_observations: list[int] = field(default_factory=list)
+    toi_cacheaccess_observations: list[int] = field(default_factory=list)
     toi_start: int = 0
     toi_end1: int = 0
     toi_end2: int = 0
@@ -55,6 +58,10 @@ class Counter:
     retired_instruction_count: int = 0
 
     branch_count: int = 0
+
+    cache_miss_count: int = 0
+    cache_read_reqs_count: int = 0
+    cache_write_reqs_count: int = 0
 
     stalls: dict[str, int] = field(default_factory=dict)
 
@@ -93,22 +100,60 @@ class Counter:
 
         return self
 
+    def compute_amat(self):
+        amats = []
+        hit_time = 1
+        miss_penalty = 100
+        for misses, accesses in zip(self.toi_cachemiss_observations, self.toi_cacheaccess_observations):
+            miss_rate = misses / accesses
+            amats.append(hit_time + miss_rate * miss_penalty)
+        
+        return amats
+
     def print(self, file=sys.stdout) -> None:
-        if len(self.task_of_interest_cycles) <= 0:
+        if len(self.toi_runtime_observations) <= 0:
             raise RuntimeError("ERROR: No execution times observed")
 
-        print(f"*** number of jobs: {len(self.task_of_interest_cycles)}", file=file)
-        print(f"*** runtimes of ToI instances: {self.task_of_interest_cycles}", file=file)
-        print(f"*** max. observation: {max(self.task_of_interest_cycles)}", file=file)
-        print(f"*** min. observation: {min(self.task_of_interest_cycles)}", file=file)
-        print(f"*** mean of distribution: {np.mean(self.task_of_interest_cycles)}", file=file)
-        print(f"*** stdev of distribution: {np.std(self.task_of_interest_cycles)}", file=file)
-        print(f"*** cycles: {self.cycles}", file=file)
+        print(f"*** number of jobs: {len(self.toi_runtime_observations)}", file=file)
+        
+        print(f"\n*** cycles: {self.cycles}", file=file)
         if self.cycles == 0:
             return
+        print(f"*** execution time observations: {self.toi_runtime_observations}", file=file)
+        print(f"*** max. observation: {max(self.toi_runtime_observations)}", file=file)
+        print(f"*** min. observation: {min(self.toi_runtime_observations)}", file=file)
+        print(f"*** mean: {np.mean(self.toi_runtime_observations):.3f}", file=file)
+        print(f"*** stdev: {np.std(self.toi_runtime_observations):.3f}", file=file)
+
+        print(f"\n*** cache accesses: {self.cache_read_reqs_count + self.cache_write_reqs_count}", file=file)
+        if self.cache_read_reqs_count + self.cache_write_reqs_count == 0:
+            return
+        print(f"  reads: {self.cache_read_reqs_count}", file=file)
+        print(f"  writes: {self.cache_write_reqs_count}", file=file)
+        print(f"*** cache access observations: {self.toi_cacheaccess_observations}", file=file)
+        print(f"*** max. observation: {max(self.toi_cacheaccess_observations)}", file=file)
+        print(f"*** min. observation: {min(self.toi_cacheaccess_observations)}", file=file)
+        print(f"*** mean: {np.mean(self.toi_cacheaccess_observations):.3f}", file=file)
+        print(f"*** stdev: {np.std(self.toi_cacheaccess_observations):.3f}", file=file)
+
+        print(f"\n*** cache misses: {self.cache_miss_count}", file=file)
+        if self.cache_miss_count == 0:
+            return
+        print(f"*** cache miss observations: {self.toi_cachemiss_observations}", file=file)
+        print(f"*** max. observation: {max(self.toi_cachemiss_observations)}", file=file)
+        print(f"*** min. observation: {min(self.toi_cachemiss_observations)}", file=file)
+        print(f"*** mean: {np.mean(self.toi_cachemiss_observations):.3f}", file=file)
+        print(f"*** stdev: {np.std(self.toi_cachemiss_observations):.3f}", file=file)
+
+        amats = self.compute_amat()   
+        print(f"\n*** AMAT observations: {[round(amat, 2) for amat in amats]}", file=file)
+        print(f"*** max. observation: {max(amats):.3f}", file=file)
+        print(f"*** min. observation: {min(amats):.3f}", file=file)
+        print(f"*** mean: {np.mean(amats):.3f}", file=file)
+        print(f"*** stdev: {np.std(amats):.3f}", file=file)
 
         # pylint: disable=consider-using-f-string
-        print("*** retired instructions per cycle: %.2f (%d)" %
+        print("\n*** retired instructions per cycle: %.2f (%d)" %
               (self.retired_instruction_count / self.cycles,
                self.retired_instruction_count),
               file=file)

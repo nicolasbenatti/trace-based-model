@@ -89,7 +89,7 @@ class CPU:
         prev_ret_insts = 0
         maybe_deadlock_count = 0
         deadlock_threshold = 1000
-        prev_toi_state = 0
+        toi_prv_state = 0
 
         for unit in self.units:
             unit.reset(self.counter)
@@ -115,13 +115,18 @@ class CPU:
                 for unit in self.units:
                     unit.tock(self.counter)
 
-                if prev_toi_state == False and self.counter.is_in_toi == True:
+                if toi_prv_state == False and self.counter.is_in_toi == True:
                     print("[CPU] ENTERED task of interest")
                     task_of_interest_start = self.counter.cycles
-                elif prev_toi_state == True and self.counter.is_in_toi == False:
-                    self.counter.task_of_interest_cycles.append(self.counter.cycles - task_of_interest_start)
+                    toi_prv_cachemisses = self.counter.cache_miss_count
+                    toi_prv_cacheaccesses = self.counter.cache_read_reqs_count + self.counter.cache_write_reqs_count
+                elif toi_prv_state == True and self.counter.is_in_toi == False:
                     print(f"[CPU] EXITED task of interest. Runtime {self.counter.cycles - task_of_interest_start} cycles")
-                prev_toi_state = self.counter.is_in_toi
+                    self.counter.toi_runtime_observations.append(self.counter.cycles - task_of_interest_start)
+                    self.counter.toi_cachemiss_observations.append(self.counter.cache_miss_count - toi_prv_cachemisses)
+                    self.counter.toi_cacheaccess_observations.append((self.counter.cache_read_reqs_count + self.counter.cache_write_reqs_count) - toi_prv_cacheaccesses)
+                
+                toi_prv_state = self.counter.is_in_toi
 
                 if tbm_options.args.print_trace:
                     self.print_state(tbm_options.args.print_trace)

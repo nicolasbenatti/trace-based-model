@@ -99,7 +99,7 @@ class ScalarPipe(interfaces.ExecPipeline):
 
         return False
 
-    def do_load(self) -> None:
+    def do_load(self, cntr: Counter) -> None:
         if self._load_stage is None:
             return
 
@@ -109,7 +109,7 @@ class ScalarPipe(interfaces.ExecPipeline):
             assert len(inst.loads) <= 1
             for load in inst.loads:
                 if (inst, load) not in self._stalling_loads:
-                    self._mem.issue_load(inst, load)
+                    self._mem.issue_load(inst, load, cntr)
                     self._stalling_loads[(inst, load)] = None
 
         if self._stage[self._load_stage + self._fixed_load_latency]:
@@ -120,7 +120,7 @@ class ScalarPipe(interfaces.ExecPipeline):
             for load in self._mem.take_load_replys(inst):
                 self._stalling_loads[(inst, load)] = False
 
-    def do_store(self) -> None:
+    def do_store(self, cntr: Counter) -> None:
         if self._store_stage is None:
             return
 
@@ -130,7 +130,7 @@ class ScalarPipe(interfaces.ExecPipeline):
             assert len(inst.stores) <= 1
             for store in inst.stores:
                 if (inst, store) not in self._stalling_stores:
-                    self._mem.issue_store(inst, store)
+                    self._mem.issue_store(inst, store, cntr)
                     self._stalling_stores[(inst, store)] = None
 
         if self._stage[self._store_stage + self._fixed_store_latency]:
@@ -195,8 +195,8 @@ class ScalarPipe(interfaces.ExecPipeline):
                     self.retired_instrs.append(instr)
             self._stage.appendleft(None)
 
-        self.do_load()
-        self.do_store()
+        self.do_load(cntr)
+        self.do_store(cntr)
 
         # Try to issue instructions from eiq to pipeline, until one succeeds.
         if self.is_ready():

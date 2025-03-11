@@ -218,11 +218,13 @@ class CacheFront:
         self.front_replys = collections.defaultdict(collections.deque)
         self.state = None
 
-    def issue_load(self, uid, addr) -> None:
+    def issue_load(self, uid, addr, cntr: Counter) -> None:
         self.front_reqs.append(("read", uid, addr))
+        cntr.cache_read_reqs_count += 1 
 
-    def issue_store(self, uid, addr) -> None:
+    def issue_store(self, uid, addr, cntr: Counter) -> None:
         self.front_reqs.append(("write", uid, addr))
+        cntr.cache_write_reqs_count += 1 
 
     def take_load_replys(self, uid) -> Sequence[int]:
         res = collections.deque()
@@ -278,7 +280,7 @@ class CacheFront:
                 self.parent.front_reqs.append(("write", self, addr))
                 self.state = ("stall-parent", req)
 
-    def tock(self) -> None:
+    def tock(self, cntr: Counter = None) -> None:
         if not self.state and self.front_reqs:
             req = self.front_reqs.popleft()
             if req[0] in ["read", "write"]:
@@ -292,6 +294,7 @@ class CacheFront:
                         self.state = ("stall", self.latencies[cmd] - 1, req)
                 else:
                     self.state = ("miss", req)
+                    cntr.cache_miss_count += 1
             else:
                 assert False
 
@@ -375,7 +378,7 @@ class Cache:
                 self.parent.front_reqs.append(("write", self, addr))
                 self.state = ("stall-parent", req)
 
-    def tock(self) -> None:
+    def tock(self, cntr: Counter = None) -> None:
         if not self.state and self.front_reqs:
             req = self.front_reqs.popleft()
             if req[0] in ["fetch_read", "fetch_write"]:
@@ -387,6 +390,7 @@ class Cache:
                     self.state = ("stall", self.latencies[cmd] - 1, req)
                 else:
                     self.state = ("miss", req)
+                    cntr.cache_miss_count += 1
 
             elif req[0] == "write":
                 cmd, _, addr = req
@@ -397,6 +401,7 @@ class Cache:
                         self.state = ("write-through", req)
                 else:
                     self.state = ("miss", req)
+                    cntr.cache_miss_count += 1
 
             else:
                 assert False
@@ -480,7 +485,7 @@ class MainMemory:
                     self.front_replys[res[1]].append(res)
                     self.state = None
 
-    def tock(self) -> None:
+    def tock(self, cntr: Counter = None) -> None:
         if self.state is None and self.front_reqs:
             req = self.front_reqs.popleft()
             if req[0] in ["read", "write", "fetch_read", "fetch_write"]:
@@ -539,7 +544,7 @@ class MemorySystem(interfaces.Module):
         super().tock(cntr)
 
         for e in self.elements.values():
-            e.tock()
+            e.tock(cntr)
 
     # Implements interfaces.Module
     def pending(self) -> int:
