@@ -46,7 +46,7 @@
           "write_ports" : { "$ref" : "#/$defs/positive_integer" }
         },
         "if" : {
-          "properties" : { "type" : { "const" : "vector" } }
+          "properties" : { "type" : { "enum" : ["vector"] } }
         }, "then" : {
           "properties" : {
             "dedicated_read_ports" : {
@@ -220,7 +220,7 @@
               "type" : { "enum" : ["direct_map", "set_assoc"] }
             },
             "if" : {
-              "properties" : { "type" : { "constant" : "set_assoc" } }
+              "properties" : { "type" : { "enum" : ["set_assoc"] } }
             }, "then" : {
               "properties" : {
                 "set_size" : {

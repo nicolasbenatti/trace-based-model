@@ -283,10 +283,7 @@
     "levels" : {
       "L1D" : {
         "type" : "dcache",
-        "placement" : { "type" : "direct_map",
-                        "set_size" : 4,
-                        "replacement" : "LRU"
-                      },
+        "placement" : { "type" : "direct_map" },
         "write_policy" : "write_back",
         "line_size" : 256, # bits
         "size" : "16KB",
