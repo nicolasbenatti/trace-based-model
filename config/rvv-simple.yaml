@@ -13,7 +13,7 @@
 # limitations under the License.
 
 {
-  "description": "TBM configuration for RISC-V with vector extension.",
+  "description": "TBM configuration for RISC-V RV32GC microcontroller",
 
   # This file is also used as an example of a TBM configuration, hence all the
   # comments.
