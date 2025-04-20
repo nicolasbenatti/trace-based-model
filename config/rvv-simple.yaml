@@ -262,11 +262,11 @@
       # number of cycles required for handling a fetch read request coming from
       # higher levels, not including the handling of the request by lower
       # levels.
-      "fetch_read" : 10,
+      "fetch_read" : 100,
 
       # fetch_write: positive integer, required with levels.
       # Similar to fetch_read.
-      "fetch_write" : 10,
+      "fetch_write" : 100,
 
       # write: positive integer, required (TODO(sflur): maybe this shouldn't be
       # required for instruction cache?). The number of cycles required for
@@ -286,7 +286,7 @@
         "placement" : { "type" : "direct_map" },
         "write_policy" : "write_back",
         "line_size" : 256, # bits
-        "size" : "16KB",
+        "size" : "8KB",
         "latencies" : { "read" : 1, "write" : 1 }
       },
       "L1I" : {
