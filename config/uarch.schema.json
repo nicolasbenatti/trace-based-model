@@ -227,7 +227,8 @@
                   "description" : "the number of lines in the set; must be a power of 2",
                   "$ref" : "#/$defs/positive_integer"
                 },
-                "replacement" : { "enum" : ["LRU"] }
+                "placement" : { "enum" : ["randomized"] },
+                "replacement" : { "enum" : ["LRU", "randomized"] }
               },
               "required" : ["set_size", "replacement"]
             },
