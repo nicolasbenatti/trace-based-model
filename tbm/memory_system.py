@@ -19,12 +19,16 @@ import math
 import re
 import sys
 from typing import Optional, Sequence, Union
+import numpy as np
 
 from counter import Counter
 import interfaces
 
+
+# <!!> Set types (for set-associative caches) <!!>
+
 class LRUSet:
-    """LRU set."""
+    """Set with LRU replacement policy."""
 
     def __init__(self, size: int) -> None:
         self.the_set = collections.deque(maxlen=size)
@@ -69,6 +73,80 @@ class LRUSet:
         except KeyError:
             return False
 
+class RandomizedSet:
+    """Set with random replacement policy."""
+
+    def __init__(self, size: int) -> None:
+        self.the_set = collections.deque(maxlen=size)
+        self.dirty = set()
+        self.prng = np.random.default_rng()
+
+    def try_access(self, tag: int, set_dirty: bool) -> bool:
+        try:
+            self.the_set.remove(tag)
+            self.the_set.append(tag)
+            if set_dirty:
+                self.dirty.add(tag)
+            return True
+        except ValueError:  # remove failed, hence tag not in set
+            return False
+
+    def evict(self) -> Optional[int]:
+        if len(self.the_set) == self.the_set.maxlen:
+            rndIdx = int(self.prng.uniform(0, len(self.the_set)))
+            
+            tag = self.the_set.remove(self.the_set[rndIdx])
+            try:
+                self.dirty.remove(tag)
+                return tag
+            except KeyError:
+                pass
+        return None
+
+    def insert(self, tag: int, dirty: bool) -> None:
+        if self.the_set:
+            self.dirty.discard(self.the_set[0])
+        self.the_set.append(tag)
+        if dirty:
+            self.dirty.add(tag)
+
+    def take(self, tag: int) -> bool:
+        if self.the_set[-1] == tag:
+            # This is an optimisation (take is always called after try_access)
+            self.the_set.pop()
+        else:
+            self.the_set.remove(tag)
+        try:
+            self.dirty.remove(tag)
+            return True
+        except KeyError:
+            return False
+
+#  <!!> Utility functions <!!>
+
+def load_mem(desc, line_size_log2: int, size_log2: int):
+    if desc["type"] == "set_assoc":
+        return SetAssocMem(desc, line_size_log2, size_log2)
+    elif desc["type"] == "direct_map":
+        return DirectMapMem(line_size_log2, size_log2)
+    else:
+        raise ValueError("Unsupported cache type")
+
+BYTE_UNITS = {"b": 0, "kb": 10, "mb": 20, "gb": 30, "tb": 40}
+
+def parse_bytes_to_log2(x: Union[int, str]) -> int:
+    u = 0
+    if isinstance(x, str):
+        m = re.match(r"^(\d+)\s*(.*)", x)
+        assert m
+        x = int(m.group(1))
+        if m.group(2):
+            u = BYTE_UNITS[m.group(2).lower()]
+
+    assert x > 0
+    return int(math.log2(x)) + u
+
+# <!!> Cache types <!!>
 
 class DirectMapMem:
     """Direct Map."""
@@ -143,8 +221,15 @@ class SetAssocMem:
             self.tags = [
                 LRUSet(desc["set_size"]) for _ in range(2**self.index_size_log2)
             ]
+        elif desc["replacement"] == "randomized":
+            self.tags = [
+                RandomizedSet(desc["set_size"]) for _ in range(2**self.index_size_log2)
+            ]
         else:
             assert False
+        
+        print((f"block size: {(2**line_size_log2)}B, cache size: {(2**size_log2)}B,"
+                f" index bits: {self.index_size_log2}, associativity {2**set_size_log2}"))
 
     def index(self, addr: int) -> int:
         mask = (1 << self.index_size_log2) - 1
@@ -171,33 +256,7 @@ class SetAssocMem:
         return (((tag << self.index_size_log2) | i) << self.line_size_log2
                 if tag is not None else None)
 
-
-def load_mem(desc, line_size_log2: int, size_log2: int):
-    if desc["type"] == "set_assoc":
-        return SetAssocMem(desc, line_size_log2, size_log2)
-
-    if desc["type"] == "direct_map":
-        return DirectMapMem(line_size_log2, size_log2)
-
-    # TODO(sflur): report error
-    assert False
-
-
-BYTE_UNITS = {"b": 0, "kb": 10, "mb": 20, "gb": 30, "tb": 40}
-
-
-def parse_bytes_to_log2(x: Union[int, str]) -> int:
-    u = 0
-    if isinstance(x, str):
-        m = re.match(r"^(\d+)\s*(.*)", x)
-        assert m
-        x = int(m.group(1))
-        if m.group(2):
-            u = BYTE_UNITS[m.group(2).lower()]
-
-    assert x > 0
-    return int(math.log2(x)) + u
-
+# <!!> Cache frontends <!!>
 
 class CacheFront:
     """Cache that supports load/store."""
@@ -320,7 +379,6 @@ class CacheFront:
             else:
                 assert False
 
-
 class Cache:
     """Cache that is part of a hierarchy (not front)."""
 
@@ -427,7 +485,6 @@ class Cache:
                     self.state = ("stall", self.latencies[cmd] - 1, req)
             else:
                 assert False
-
 
 class MainMemory:
     """Main memory."""
