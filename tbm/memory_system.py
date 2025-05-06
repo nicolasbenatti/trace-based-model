@@ -261,7 +261,7 @@ class SetAssocMem:
 class CacheFront:
     """Cache that supports load/store."""
 
-    def __init__(self, desc, parent) -> None:
+    def __init__(self, desc, parent, is_data: bool) -> None:
         self.parent = parent
 
         # TODO(sflur): report an error if not divisible by 8?
@@ -277,13 +277,17 @@ class CacheFront:
         self.front_replys = collections.defaultdict(collections.deque)
         self.state = None
 
+        self.is_data = is_data
+
     def issue_load(self, uid, addr, cntr: Counter) -> None:
         self.front_reqs.append(("read", uid, addr))
-        cntr.cache_read_reqs_count += 1 
+        if self.is_data:
+            cntr.cache_read_reqs_count += 1
 
     def issue_store(self, uid, addr, cntr: Counter) -> None:
         self.front_reqs.append(("write", uid, addr))
-        cntr.cache_write_reqs_count += 1 
+        if self.is_data:
+            cntr.cache_write_reqs_count += 1
 
     def take_load_replys(self, uid) -> Sequence[int]:
         res = collections.deque()
@@ -566,11 +570,11 @@ class MemorySystem(interfaces.Module):
     def load_element(self, uid, desc, parent) -> None:
         front = "levels" not in desc
         if desc["type"] == "unified":
-            e = CacheFront(desc, parent) if front else Cache(desc, parent)
+            e = CacheFront(desc, parent, True) if front else Cache(desc, parent)
         elif desc["type"] == "dcache":
-            e = CacheFront(desc, parent) if front else Cache(desc, parent)
+            e = CacheFront(desc, parent, True) if front else Cache(desc, parent)
         elif desc["type"] == "icache":
-            e = CacheFront(desc, parent) if front else Cache(desc, parent)
+            e = CacheFront(desc, parent, False) if front else Cache(desc, parent)
         else:
             self.logger.error("unknown cache type: %s", desc['type'])
             sys.exit(1)
