@@ -145,7 +145,7 @@ class Counter:
         print(f"*** mean: {np.mean(self.toi_cachemiss_observations):.3f}", file=file)
         print(f"*** stdev: {np.std(self.toi_cachemiss_observations):.3f}", file=file)
 
-        amats = self.compute_amat()   
+        amats = self.compute_amat()
         print(f"\n*** AMAT observations: {[round(amat, 2) for amat in amats]}", file=file)
         print(f"*** max. observation: {max(amats):.3f}", file=file)
         print(f"*** min. observation: {min(amats):.3f}", file=file)
