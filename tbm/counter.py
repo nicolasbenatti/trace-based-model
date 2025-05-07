@@ -103,7 +103,7 @@ class Counter:
     def compute_amat(self):
         amats = []
         hit_time = 1
-        miss_penalty = 100
+        miss_penalty = 10
         for misses, accesses in zip(self.toi_cachemiss_observations, self.toi_cacheaccess_observations):
             miss_rate = misses / accesses
             amats.append(hit_time + miss_rate * miss_penalty)
