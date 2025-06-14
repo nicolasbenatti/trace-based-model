@@ -175,6 +175,10 @@ class FetchUnit(interfaces.FetchUnit):
                 # TODO(sflur): what do we need to do to handle an exception?
                 self.log("next fetch is an exception handler?")
                 self._next_fetch_addr.addr = self._trace.next_addr()
+            
+            if inst.addr == cntr.toi_start:
+                #print(f"ENTER task of interest: {retired_instr.addr:0X}") 
+                cntr.is_in_toi = True
 
         # We count all the instructions a uarch would actually fetch.
         cntr.utilizations[self.name].count += self._fetch_rate

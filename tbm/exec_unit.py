@@ -118,10 +118,10 @@ class ExecUnit(interfaces.ExecUnit):
         cntr.retired_instruction_count += len(self._retired_instructions)
 
         for retired_instr in self._retired_instructions:
-            if retired_instr.addr == cntr.toi_start:
+            """ if retired_instr.addr == cntr.toi_start:
                 #print(f"ENTER task of interest: {retired_instr.addr:0X}") 
-                cntr.is_in_toi = True
-            elif retired_instr.addr in [cntr.toi_end1, cntr.toi_end2]:
+                cntr.is_in_toi = True """
+            if retired_instr.addr in [cntr.toi_end1, cntr.toi_end2]:
                 #print(f"EXIT task of interest: {retired_instr.addr:0X}")
                 cntr.is_in_toi = False
 
